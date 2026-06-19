@@ -125,3 +125,11 @@ def system_information():
 
     return json.dumps(result, indent=2, ensure_ascii=False)
 
+
+TOOLS: list = [
+    check_cpu,
+    check_memory,
+    check_disk,
+    list_top_five_process,
+    system_information
+]
