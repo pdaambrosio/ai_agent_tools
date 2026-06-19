@@ -1,9 +1,15 @@
+import os
+
 from langchain_ollama import OllamaLLM
-from utils import tools
+
+from src.utils import tools
+
+OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "qwen2.5-coder:3b")
+OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 
 llm = OllamaLLM(
-    model="qwen2.5-coder:3b",
-    base_url="http://localhost:11434"
+    model=OLLAMA_MODEL,
+    base_url=OLLAMA_BASE_URL,
 )
 
 SYSTEM_PROMPT: str = """
