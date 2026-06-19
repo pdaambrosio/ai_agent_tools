@@ -70,12 +70,21 @@ Then ask things like:
 - `Qual é o status geral do sistema?`
 - `Quais processos consomem mais memória?`
 
-Type `sair` to exit.
+Type `sair`, `exit`, `quit`, or `q` to exit. `Ctrl+C` and `Ctrl+D` are also handled.
+
+### Configuration
+
+Both the Ollama model and base URL can be overridden with environment variables:
+
+| Variable          | Default                  |
+|-------------------|--------------------------|
+| `OLLAMA_MODEL`    | `qwen2.5-coder:3b`       |
+| `OLLAMA_BASE_URL` | `http://localhost:11434` |
 
 ## How it works
 
 1. `agent_check(question)` receives the user's question.
-2. `decide_tools(question)` matches keywords (e.g. `cpu`, `memória`, `disco`, `processo`, `sistema`) to one or more tools. If nothing matches, all tools are invoked.
+2. `decide_tools(question)` matches keywords (declared in `TOOL_KEYWORDS`, e.g. `cpu`, `memória`, `disco`, `processo`, `sistema`) to one or more tools. If nothing matches, all tools are invoked.
 3. Each selected tool is executed via `tool_call`, returning JSON output from `psutil`.
 4. The collected data is concatenated into a context prompt with the system instructions and sent to the Ollama model.
 5. The LLM response is returned to the CLI.
@@ -83,4 +92,5 @@ Type `sair` to exit.
 ## Notes
 
 - The system prompt and CLI strings are written in Portuguese.
-- The Ollama base URL and model name are hardcoded in `src/agent/agent.py`; change them there if your setup differs.
+- The Ollama base URL and model name can be overridden with the `OLLAMA_MODEL` and `OLLAMA_BASE_URL` environment variables (defaults defined in `src/agent/agent.py`).
+- The "critical" threshold (`> 80%`) is centralised as `CRITICAL_USAGE_PERCENT` in `src/utils/tools.py`.
