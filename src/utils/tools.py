@@ -5,8 +5,6 @@ from datetime import datetime
 import psutil
 import json
 
-import main
-
 
 @tool
 def check_cpu() -> str:
