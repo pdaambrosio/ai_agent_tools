@@ -23,6 +23,7 @@ def check_cpu() -> str:
     }
     return json.dumps(result, indent=2, ensure_ascii=False)
 
+
 @tool
 def check_memory() -> str:
     """
@@ -45,5 +46,29 @@ def check_memory() -> str:
         "alert": "⚠️ CRÍTICO" if percent > 80 else "✅ Normal",
         "timestamp": datetime.now().strftime("%d-%m-%Y %H:%M:%S")
     }
+    return json.dumps(result, indent=2, ensure_ascii=False)
+
+
+@tool
+def check_disk() -> str:
+    """
+    Check disk usage.
+    Return disk usage total, usage, free and percent.
+    """
+    disk_usage = psutil.disk_usage('/')
+    total_gb: float = round(disk_usage.total / (1024**3), 2)
+    used_gb: float = round(disk_usage.used / (1024**3), 2)
+    free_gb: float = round(disk_usage.free / (1024**3), 2)
+    percent: float = round(disk_usage.percent, 2)
+
+    result: dict = {
+        "total_gb": f"{total_gb:.2f}GB",
+        "used_gb": f"{used_gb:.2f}GB",
+        "free_gb": f"{free_gb:.2f}GB",
+        "percent": f"{percent:.2f}%",
+        "alert": "⚠️ CRÍTICO" if percent > 80 else "✅ Normal",
+        "timestamp": datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+    }
+
     return json.dumps(result, indent=2, ensure_ascii=False)
 
