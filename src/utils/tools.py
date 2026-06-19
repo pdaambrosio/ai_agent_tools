@@ -4,6 +4,18 @@ import platform
 import psutil
 import json
 
+CRITICAL_USAGE_PERCENT: float = 80.0
+ALERT_CRITICAL: str = "⚠️ CRÍTICO"
+ALERT_NORMAL: str = "✅ Normal"
+
+
+def _alert(percent: float) -> str:
+    return ALERT_CRITICAL if percent > CRITICAL_USAGE_PERCENT else ALERT_NORMAL
+
+
+def _now() -> str:
+    return datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+
 
 @tool
 def check_cpu() -> str:
@@ -18,7 +30,8 @@ def check_cpu() -> str:
         "cpu_usage": f"{cpu_usage:.2f}%",
         "cpu_usage_per_core": [f"Core {i}: {use}%" for i, use in enumerate(cpu_usage_per_core)],
         "cpu_count": psutil.cpu_count(),
-        "timestamp": datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+        "alert": _alert(cpu_usage),
+        "timestamp": _now(),
     }
     return json.dumps(result, indent=2, ensure_ascii=False)
 
@@ -42,8 +55,8 @@ def check_memory() -> str:
         "free_gb": f"{free_gb:.2f}GB",
         "available_gb": f"{available_gb:.2f}GB",
         "percent": f"{percent:.2f}%",
-        "alert": "⚠️ CRÍTICO" if percent > 80 else "✅ Normal",
-        "timestamp": datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+        "alert": _alert(percent),
+        "timestamp": _now(),
     }
     return json.dumps(result, indent=2, ensure_ascii=False)
 
@@ -65,15 +78,15 @@ def check_disk() -> str:
         "used_gb": f"{used_gb:.2f}GB",
         "free_gb": f"{free_gb:.2f}GB",
         "percent": f"{percent:.2f}%",
-        "alert": "⚠️ CRÍTICO" if percent > 80 else "✅ Normal",
-        "timestamp": datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+        "alert": _alert(percent),
+        "timestamp": _now(),
     }
 
     return json.dumps(result, indent=2, ensure_ascii=False)
 
 
 @tool
-def list_top_five_process():
+def list_top_five_process() -> str:
     """
     List the five processes that consume the most memory.
     Useful to identify memory leaks
@@ -93,14 +106,14 @@ def list_top_five_process():
 
     result: dict = {
         "top_five_per_memory": top_five_per_memory,
-        "timestamp": datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+        "timestamp": _now(),
     }
 
     return json.dumps(result, indent=2, ensure_ascii=False)
 
 
 @tool
-def system_information():
+def system_information() -> str:
     """
     Get general system information.
     Return SO, hostname, uptime, etc.
@@ -118,7 +131,7 @@ def system_information():
         "hostname": hostname,
         "architecture": architecture,
         "uptime_hours": uptime_hours,
-        "timestamp": datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+        "timestamp": _now(),
     }
 
     return json.dumps(result, indent=2, ensure_ascii=False)
@@ -129,5 +142,5 @@ TOOLS: list = [
     check_memory,
     check_disk,
     list_top_five_process,
-    system_information
+    system_information,
 ]
