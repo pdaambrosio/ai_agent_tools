@@ -2,6 +2,7 @@ from os import name
 
 from langchain_core.tools import tool
 from datetime import datetime
+import platform
 import psutil
 import json
 
@@ -99,4 +100,28 @@ def list_top_five_process():
 
     return json.dumps(result, indent=2, ensure_ascii=False)
 
+
+@tool
+def system_information():
+    """
+    Get general system information.
+    Return SO, hostname, uptime, etc.
+    """
+    uptime_seconds: float = datetime.now().timestamp() - psutil.boot_time()
+    uptime_hours: float = round(uptime_seconds / 3600, 2)
+    so: str = platform.system()
+    version: str = platform.release()
+    hostname: str = platform.node()
+    architecture: str = platform.machine()
+
+    result: dict = {
+        "so": so,
+        "version": version,
+        "hostname": hostname,
+        "architecture": architecture,
+        "uptime_hours": uptime_hours,
+        "timestamp": datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+    }
+
+    return json.dumps(result, indent=2, ensure_ascii=False)
 
