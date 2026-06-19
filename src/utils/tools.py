@@ -72,3 +72,31 @@ def check_disk() -> str:
 
     return json.dumps(result, indent=2, ensure_ascii=False)
 
+
+@tool
+def list_top_five_process():
+    """
+    List the five processes that consume the most memory.
+    Useful to identify memory leaks
+    """
+    processes: list = []
+    for proc in psutil.process_iter(['pid', 'name', 'memory_percent']):
+        try:
+            processes.append({
+                "pid": proc.info['pid'],
+                "name": proc.info['name'],
+                "memory_percent": round(proc.info['memory_percent'], 2),
+            })
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            pass
+
+    top_five_per_memory: list = sorted(processes, key=lambda x: x['memory_percent'], reverse=True)[:5]
+
+    result: dict = {
+        "top_five_per_memory": top_five_per_memory,
+        "timestamp": datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+    }
+
+    return json.dumps(result, indent=2, ensure_ascii=False)
+
+
