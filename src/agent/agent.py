@@ -31,7 +31,7 @@ IMPORTANTE:
 
 Formato esperado quando usar ferramenta:
 Se a pergunta pedir para "verificar CPU", responda:
-"Deixa eu verificar... [nome da ferramenta aqui] ...os dados mostram que..."
+"Deixa eu verificar... verificado com a tool [nome da ferramenta aqui] ...os dados mostram que..."
 """
 
 user_prompt_template: str = """
