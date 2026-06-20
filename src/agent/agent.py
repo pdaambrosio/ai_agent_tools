@@ -1,9 +1,15 @@
+import os
+
 from langchain_ollama import OllamaLLM
-from utils import tools
+
+from src.utils import tools
+
+OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "qwen2.5-coder:3b")
+OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 
 llm = OllamaLLM(
-    model="qwen2.5-coder:3b",
-    base_url="http://localhost:11434"
+    model=OLLAMA_MODEL,
+    base_url=OLLAMA_BASE_URL,
 )
 
 SYSTEM_PROMPT: str = """
@@ -25,7 +31,7 @@ IMPORTANTE:
 
 Formato esperado quando usar ferramenta:
 Se a pergunta pedir para "verificar CPU", responda:
-"Deixa eu verificar... [nome da ferramenta aqui] ...os dados mostram que..."
+"Deixa eu verificar... verificado com a tool [nome da ferramenta aqui] ...os dados mostram que..."
 """
 
 user_prompt_template: str = """
@@ -56,30 +62,29 @@ def tool_call(tool_name: str) -> str:
         return f"Ferramenta '{tool_name}' não encontrada"
 
 
-def decide_tools(question: str) -> list:
+TOOL_KEYWORDS: dict[str, tuple[str, ...]] = {
+    "verificar_uso_cpu": ("cpu", "processador", "processamento"),
+    "verificar_memoria": ("memória", "memoria", "ram"),
+    "verificar_disco": ("disco", "armazenamento", "storage", "espaço"),
+    "listar_processos_top_5": ("processo", "processos", "aplicação", "vazamento"),
+    "informacoes_sistema": ("sistema", "geral", "status", "saúde"),
+}
+
+
+def decide_tools(question: str) -> list[str]:
     """
     Analise the question and decide which tools to use.
+    Falls back to all tools when no keyword matches.
     """
     question_lower = question.lower()
-    tools_to_use: list = []
-
-    if any(word in question_lower for word in ["cpu", "processador", "processamento"]):
-        tools_to_use.append("verificar_uso_cpu")
-
-    if any(word in question_lower for word in ["memória", "memoria", "ram"]):
-        tools_to_use.append("verificar_memoria")
-
-    if any(word in question_lower for word in ["disco", "armazenamento", "storage", "espaço"]):
-        tools_to_use.append("verificar_disco")
-
-    if any(word in question_lower for word in ["processo", "processos", "aplicação", "vazamento"]):
-        tools_to_use.append("listar_processos_top_5")
-
-    if any(word in question_lower for word in ["sistema", "c", "status", "saúde"]):
-        tools_to_use.append("informacoes_sistema")
+    tools_to_use: list[str] = [
+        name
+        for name, keywords in TOOL_KEYWORDS.items()
+        if any(word in question_lower for word in keywords)
+    ]
 
     if not tools_to_use:
-        tools_to_use = ["verificar_uso_cpu", "verificar_memoria", "verificar_disco", "listar_processos_top_5", "informacoes_sistema"]
+        tools_to_use = list(TOOL_KEYWORDS.keys())
 
     return tools_to_use
 
